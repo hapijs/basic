@@ -1,5 +1,5 @@
 <a href="https://github.com/spumko"><img src="https://raw.github.com/spumko/spumko/master/images/from.png" align="right" /></a>
-## hapi-auth-basic
+### hapi-auth-basic
 
 [**hapi**](https://github.com/spumko/hapi) Basic authentication plugin
 
