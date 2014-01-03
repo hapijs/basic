@@ -1,0 +1,62 @@
+﻿<p><a href="https://github.com/spumko"><img src="https://raw.github.com/spumko/spumko/master/images/from.png" align="right" /></a></p>
+
+<h1>hapi-auth-basic</h1>
+
+<p><a href="https://github.com/spumko/hapi"><strong>hapi</strong></a> Basic authentication plugin</p>
+
+<p><a href="http://travis-ci.org/spumko/hapi-auth-basic"><img src="https://secure.travis-ci.org/spumko/hapi-auth-basic.png" alt="Build Status"/></a></p>
+
+<p>Basic authentication requires validating a username and password combination. The <code>'basic'</code> scheme takes the following options:</p>
+
+<ul>
+<li><code>validateFunc</code> - (required) a user lookup and password validation function with the signature <code>function(username, password, callback)</code> where:<br/>
+<ul><br/>
+<li><code>username</code> - the username received from the client.</li><br/>
+<li><code>password</code> - the password received from the client.</li><br/>
+<li><code>callback</code> - a callback function with the signature <code>function(err, isValid, credentials)</code> where:<br/><br/>
+<ul><br/><br/>
+<li><code>err</code> - an internal error.</li><br/><br/>
+<li><code>isValid</code> - <code>true</code> if both the username was found and the password matched, otherwise <code>false</code>.</li><br/><br/>
+<li><code>credentials</code> - a credentials object passed back to the application in <code>request.auth.credentials</code>. Typically, <code>credentials</code> are only<br/><br/><br/>
+included when <code>isValid</code> is <code>true</code>, but there are cases when the application needs to know who tried to authenticate even when it fails<br/><br/><br/>
+(e.g. with authentication mode <code>'try'</code>).</li><br/><br/>
+</ul></li><br/>
+</ul></li>
+<li><code>allowEmptyUsername</code> - (optional) if <code>true</code>, allows making requests with an empty username. Defaults to <code>false</code>.</li>
+</ul>
+
+<p>```javascript<br/>
+var Bcrypt = require('bcrypt');</p>
+
+<p>var users = {<br/>
+    john: {<br/>
+        username: 'john',<br/>
+        password: '$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm',   // 'secret'<br/>
+        name: 'John Doe',<br/>
+        id: '2133d32a'<br/>
+    }<br/>
+};</p>
+
+<p>var validate = function (username, password, callback) {</p>
+
+<pre><code>var user = users[username];
+if (!user) {
+    return callback(null, false);
+}
+
+Bcrypt.compare(password, user.password, function (err, isValid) {
+
+    callback(err, isValid, { id: user.id, name: user.name });
+});
+</code></pre>
+
+<p>};</p>
+
+<p>server.pack.require('hapi-auth-basic', function (err) {</p>
+
+<pre><code>server.auth.strategy('simple', 'basic', { validateFunc: validate });
+server.route({ method: 'GET', path: '/', config: { auth: 'simple' } });
+</code></pre>
+
+<p>});<br/>
+```</p>
