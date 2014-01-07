@@ -367,7 +367,7 @@ describe('Basic', function () {
 
         var fn = function () {
 
-            server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: 'required' }, payload: 'raw' } });
+            server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: 'required' } } });
         };
 
         expect(fn).to.throw(Error);
@@ -378,7 +378,7 @@ describe('Basic', function () {
 
         var fn = function () {
 
-            server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: 'optional' }, payload: 'raw' } });
+            server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: 'optional' } } });
         };
 
         expect(fn).to.throw(Error);
@@ -389,7 +389,7 @@ describe('Basic', function () {
 
         var fn = function () {
 
-            server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: false }, payload: 'raw' } });
+            server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: false } } });
         };
 
         expect(fn).to.not.throw(Error);
