@@ -1,7 +1,7 @@
 {
   "name": "hapi-auth-basic",
   "description": "Basic authentication plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Eran Hammer <eran@hueniverse.com> (http://hueniverse.com)",
   "repository": "git://github.com/spumko/hapi-auth-basic",
   "main": "index",
@@ -12,7 +12,7 @@
     "basic"
   ],
   "engines": {
-    "node": "0.10.x"
+    "node": ">=0.10.22"
   },
   "dependencies": {
     "boom": "2.x.x",
