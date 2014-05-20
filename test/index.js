@@ -40,6 +40,9 @@ describe('Basic', function () {
         else if (username === 'invalid1') {
             return callback(null, true, 'bad');
         }
+        else if (username === 'invalid2') {
+            return callback(null, true, null);
+        }
 
         return callback(null, false);
     };
@@ -238,6 +241,18 @@ describe('Basic', function () {
     it('returns an error on non-object credentials error', function (done) {
 
         var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('invalid1', '12345') } };
+
+        server.inject(request, function (res) {
+
+            expect(res.result).to.exist;
+            expect(res.statusCode).to.equal(500);
+            done();
+        });
+    });
+
+    it('returns an error on missing credentials error', function (done) {
+
+        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('invalid2', '12345') } };
 
         server.inject(request, function (res) {
 
