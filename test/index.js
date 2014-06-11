@@ -65,13 +65,14 @@ describe('Basic', function () {
     var server = new Hapi.Server({ debug: false });
     before(function (done) {
 
-        server.pack.require('../', function (err) {
+        server.pack.register(require('../'), function (err) {
 
             expect(err).to.not.exist;
             server.auth.strategy('default', 'basic', 'required', { validateFunc: loadUser });
 
             server.route([
-                { method: 'POST', path: '/basic', handler: basicHandler, config: { auth: true } },
+//                { method: 'POST', path: '/basic', handler: basicHandler, config: { auth: true } },
+                { method: 'POST', path: '/basic', handler: basicHandler, config: { auth: 'default' } },
                 { method: 'POST', path: '/basicOptional', handler: basicHandler, config: { auth: { mode: 'optional' } } },
                 { method: 'POST', path: '/basicScope', handler: basicHandler, config: { auth: { scope: 'x' } } },
                 { method: 'POST', path: '/basicArrayScope', handler: basicHandler, config: { auth: { scope: ['x', 'y'] } } },
@@ -195,7 +196,7 @@ describe('Basic', function () {
     it('allow missing username', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.require('../', function (err) {
+        server.pack.register(require('../'), function (err) {
 
             expect(err).to.not.exist;
 
@@ -204,7 +205,7 @@ describe('Basic', function () {
                 allowEmptyUsername: true
             });
 
-            server.route({ method: 'GET', path: '/', handler: function (request, reply) { reply('ok'); }, config: { auth: true } });
+            server.route({ method: 'GET', path: '/', handler: function (request, reply) { reply('ok'); }, config: { auth: 'default' } });
 
             server.inject({ method: 'GET', url: '/', headers: { authorization: basicHeader('', 'abcd') } }, function (res) {
 
@@ -313,7 +314,7 @@ describe('Basic', function () {
     it('should ask for credentials if server has one default strategy', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.require('../', function (err) {
+        server.pack.register(require('../'), function (err) {
 
             expect(err).to.not.exist;
 
@@ -322,7 +323,8 @@ describe('Basic', function () {
                 path: '/noauth',
                 method: 'GET',
                 config: {
-                    auth: true,
+//                    auth: true,
+                    auth: 'default',
                     handler: function (request, reply) {
 
                         reply('ok');
@@ -346,10 +348,11 @@ describe('Basic', function () {
         });
     });
 
+    /* HAPI 6.0 does not invalidate strategy names https://github.com/spumko/hapi/issues/1708
     it('should throw if server has strategies route refers to nonexistent strategy', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.require('../', function (err) {
+        server.pack.register(require('../'), function (err) {
 
             expect(err).to.not.exist;
 
@@ -377,6 +380,7 @@ describe('Basic', function () {
             done();
         });
     });
+*/
 
     it('cannot add a route that has payload validation required', function (done) {
 
