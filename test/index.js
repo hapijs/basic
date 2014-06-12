@@ -348,39 +348,6 @@ describe('Basic', function () {
         });
     });
 
-    /* HAPI 6.0 does not invalidate strategy names https://github.com/spumko/hapi/issues/1708
-    it('should throw if server has strategies route refers to nonexistent strategy', function (done) {
-
-        var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
-
-            expect(err).to.not.exist;
-
-            server.auth.strategy('a', 'basic', { validateFunc: loadUser });
-            server.auth.strategy('b', 'basic', { validateFunc: loadUser });
-
-            var fn = function () {
-
-                server.route({
-                    path: '/noauth',
-                    method: 'GET',
-                    config: {
-                        auth: {
-                            strategy: 'hello'
-                        },
-                        handler: function (request, reply) {
-
-                            reply('ok');
-                        }
-                    }
-                });
-            };
-
-            expect(fn).to.throw();
-            done();
-        });
-    });
-*/
 
     it('cannot add a route that has payload validation required', function (done) {
 
