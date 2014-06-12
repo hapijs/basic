@@ -71,7 +71,6 @@ describe('Basic', function () {
             server.auth.strategy('default', 'basic', 'required', { validateFunc: loadUser });
 
             server.route([
-//                { method: 'POST', path: '/basic', handler: basicHandler, config: { auth: true } },
                 { method: 'POST', path: '/basic', handler: basicHandler, config: { auth: 'default' } },
                 { method: 'POST', path: '/basicOptional', handler: basicHandler, config: { auth: { mode: 'optional' } } },
                 { method: 'POST', path: '/basicScope', handler: basicHandler, config: { auth: { scope: 'x' } } },
@@ -323,7 +322,6 @@ describe('Basic', function () {
                 path: '/noauth',
                 method: 'GET',
                 config: {
-//                    auth: true,
                     auth: 'default',
                     handler: function (request, reply) {
 
