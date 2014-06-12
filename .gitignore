@@ -15,4 +15,7 @@ config.json
 */*/._*
 coverage.*
 lib-cov
+*.swp
+*.swo
+*.swn
 
