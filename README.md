@@ -43,9 +43,7 @@ var validate = function (username, password, callback) {
     });
 };
 
-server.pack.register({
-    plugin: require('hapi-auth-basic')
-}, function (err) {
+server.pack.register(require('hapi-auth-basic'), function (err) {
 
     server.auth.strategy('simple', 'basic', { validateFunc: validate });
     server.route({ method: 'GET', path: '/', config: { auth: 'simple' } });
