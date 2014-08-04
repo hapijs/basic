@@ -380,23 +380,30 @@ describe('Basic', function () {
         done();
     });
 
-    it('should return 500 if validateFunc receives a non-null error value', function(done) {
+    it('passes non-error err in response', function (done) {
 
-        server.auth.strategy('test_error_handling', 'basic', { 
-            validateFunc: function(username, password, callback) {
-                return callback({error: 'test error'}, false, null)
-            }
-        });
+        var server = new Hapi.Server();
+        server.pack.register(require('../'), function (err) {
 
-        server.route({ method: 'GET', path: '/test_error_handling', handler: basicHandler, config: { auth: 'test_error_handling' } })
+            expect(err).to.not.exist;
 
-        var request = { method: 'GET', url: '/test_error_handling', headers: { authorization: basicHeader('john', '12345') } };
+            server.auth.strategy('basic', 'basic', true, {
+                validateFunc: function (username, password, callback) {
 
-        server.inject(request, function (res) {
+                    return callback({ some: 'value' }, false, null);
+                }
+            });
 
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(500);
-            done();
+            server.route({ method: 'GET', path: '/', handler: basicHandler })
+
+            var request = { method: 'GET', url: '/', headers: { authorization: basicHeader('john', 'password') } };
+
+            server.inject(request, function (res) {
+
+                expect(res.result.some).to.equal('value');
+                expect(res.statusCode).to.equal(200);
+                done();
+            });
         });
     });
 });
