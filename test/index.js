@@ -28,7 +28,7 @@ describe('Basic', function () {
     var loadUser = function (username, password, callback) {
 
         if (username === 'john') {
-            return callback(null, password === '12345', {
+            return callback(null, password === '123:45', {
                 user: 'john',
                 scope: ['a'],
                 tos: '1.0.0'
@@ -54,7 +54,7 @@ describe('Basic', function () {
 
     var doubleHandler = function (request, reply) {
 
-        var options = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('john', '12345') }, credentials: request.auth.credentials };
+        var options = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('john', '123:45') }, credentials: request.auth.credentials };
 
         server.inject(options, function (res) {
 
@@ -86,7 +86,7 @@ describe('Basic', function () {
 
     it('returns a reply on successful auth', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('john', '12345') } };
+        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('john', '123:45') } };
 
         server.inject(request, function (res) {
 
@@ -109,7 +109,7 @@ describe('Basic', function () {
 
     it('returns a reply on successful double auth', function (done) {
 
-        var request = { method: 'POST', url: '/double', headers: { authorization: basicHeader('john', '12345') } };
+        var request = { method: 'POST', url: '/double', headers: { authorization: basicHeader('john', '123:45') } };
 
         server.inject(request, function (res) {
 
@@ -216,7 +216,7 @@ describe('Basic', function () {
 
     it('returns an error on unknown user', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('doe', '12345') } };
+        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('doe', '123:45') } };
 
         server.inject(request, function (res) {
 
@@ -228,7 +228,7 @@ describe('Basic', function () {
 
     it('returns an error on internal user lookup error', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('jane', '12345') } };
+        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('jane', '123:45') } };
 
         server.inject(request, function (res) {
 
@@ -240,7 +240,7 @@ describe('Basic', function () {
 
     it('returns an error on non-object credentials error', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('invalid1', '12345') } };
+        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('invalid1', '123:45') } };
 
         server.inject(request, function (res) {
 
@@ -252,7 +252,7 @@ describe('Basic', function () {
 
     it('returns an error on missing credentials error', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('invalid2', '12345') } };
+        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('invalid2', '123:45') } };
 
         server.inject(request, function (res) {
 
@@ -264,7 +264,7 @@ describe('Basic', function () {
 
     it('returns an error on insufficient tos', function (done) {
 
-        var request = { method: 'POST', url: '/basicTos', headers: { authorization: basicHeader('john', '12345') } };
+        var request = { method: 'POST', url: '/basicTos', headers: { authorization: basicHeader('john', '123:45') } };
 
         server.inject(request, function (res) {
 
@@ -276,7 +276,7 @@ describe('Basic', function () {
 
     it('returns an error on insufficient scope', function (done) {
 
-        var request = { method: 'POST', url: '/basicScope', headers: { authorization: basicHeader('john', '12345') } };
+        var request = { method: 'POST', url: '/basicScope', headers: { authorization: basicHeader('john', '123:45') } };
 
         server.inject(request, function (res) {
 
@@ -288,7 +288,7 @@ describe('Basic', function () {
 
     it('returns an error on insufficient scope specified as an array', function (done) {
 
-        var request = { method: 'POST', url: '/basicArrayScope', headers: { authorization: basicHeader('john', '12345') } };
+        var request = { method: 'POST', url: '/basicArrayScope', headers: { authorization: basicHeader('john', '123:45') } };
 
         server.inject(request, function (res) {
 
@@ -300,7 +300,7 @@ describe('Basic', function () {
 
     it('authenticates scope specified as an array', function (done) {
 
-        var request = { method: 'POST', url: '/basicArrayScopeA', headers: { authorization: basicHeader('john', '12345') } };
+        var request = { method: 'POST', url: '/basicArrayScopeA', headers: { authorization: basicHeader('john', '123:45') } };
 
         server.inject(request, function (res) {
 
@@ -330,7 +330,7 @@ describe('Basic', function () {
                 }
             });
 
-            var validOptions = { method: 'GET', url: '/noauth', headers: { authorization: basicHeader('john', '12345') } };
+            var validOptions = { method: 'GET', url: '/noauth', headers: { authorization: basicHeader('john', '123:45') } };
             server.inject(validOptions, function (res) {
 
                 expect(res.result).to.exist;
