@@ -379,4 +379,24 @@ describe('Basic', function () {
         expect(fn).to.not.throw(Error);
         done();
     });
+
+    it('should return 500 if validateFunc receives a non-null error value', function(done) {
+
+        server.auth.strategy('test_error_handling', 'basic', { 
+            validateFunc: function(username, password, callback) {
+                return callback({error: 'test error'}, false, null)
+            }
+        });
+
+        server.route({ method: 'GET', path: '/test_error_handling', handler: basicHandler, config: { auth: 'test_error_handling' } })
+
+        var request = { method: 'GET', url: '/test_error_handling', headers: { authorization: basicHeader('john', '12345') } };
+
+        server.inject(request, function (res) {
+
+            expect(res.result).to.exist;
+            expect(res.statusCode).to.equal(500);
+            done();
+        });
+    });
 });
