@@ -406,4 +406,39 @@ describe('Basic', function () {
             });
         });
     });
+
+    it('should register a strategy if passed as options', function (done) {
+
+      var server = new Hapi.Server();
+      server.pack.register({
+        plugin: require('../'),
+        options: {
+            strategy: {
+                name: 'default',
+                options: {
+                    validateFunc: loadUser
+                }
+            }
+        }
+      }, function (err) {
+
+        expect(err).to.not.exist;
+
+        function route () {
+
+            server.route({ method: 'POST', path: '/basic', handler: basicHandler, config: { auth: 'default' } });
+        }
+
+        expect(route).to.not.throw(Error);
+
+        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('john', '123:45') } };
+
+        server.inject(request, function (res) {
+
+            expect(res.result).to.exist;
+            expect(res.result).to.equal('ok');
+            done();
+        });
+      });
+    });
 });
