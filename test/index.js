@@ -13,396 +13,392 @@ var internals = {};
 
 var expect = Lab.expect;
 var before = Lab.before;
-var describe = Lab.experiment;
 var it = Lab.test;
 
 
-describe('Basic', function () {
+var basicHeader = function (username, password) {
 
-    var basicHeader = function (username, password) {
+    return 'Basic ' + (new Buffer(username + ':' + password, 'utf8')).toString('base64');
+};
 
-        return 'Basic ' + (new Buffer(username + ':' + password, 'utf8')).toString('base64');
-    };
+var loadUser = function (username, password, callback) {
 
-    var loadUser = function (username, password, callback) {
-
-        if (username === 'john') {
-            return callback(null, password === '123:45', {
-                user: 'john',
-                scope: ['a'],
-                tos: '1.0.0'
-            });
-        }
-        else if (username === 'jane') {
-            return callback(Hapi.error.internal('boom'));
-        }
-        else if (username === 'invalid1') {
-            return callback(null, true, 'bad');
-        }
-        else if (username === 'invalid2') {
-            return callback(null, true, null);
-        }
-
-        return callback(null, false);
-    };
-
-    var basicHandler = function (request, reply) {
-
-        reply('ok');
-    };
-
-    var doubleHandler = function (request, reply) {
-
-        var options = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('john', '123:45') }, credentials: request.auth.credentials };
-
-        server.inject(options, function (res) {
-
-            reply(res.result);
+    if (username === 'john') {
+        return callback(null, password === '123:45', {
+            user: 'john',
+            scope: ['a'],
+            tos: '1.0.0'
         });
-    };
+    }
+    else if (username === 'jane') {
+        return callback(Hapi.error.internal('boom'));
+    }
+    else if (username === 'invalid1') {
+        return callback(null, true, 'bad');
+    }
+    else if (username === 'invalid2') {
+        return callback(null, true, null);
+    }
 
-    var server = new Hapi.Server({ debug: false });
-    before(function (done) {
+    return callback(null, false);
+};
 
-        server.pack.register(require('../'), function (err) {
+var basicHandler = function (request, reply) {
 
-            expect(err).to.not.exist;
-            server.auth.strategy('default', 'basic', 'required', { validateFunc: loadUser });
+    reply('ok');
+};
 
-            server.route([
-                { method: 'POST', path: '/basic', handler: basicHandler, config: { auth: 'default' } },
-                { method: 'POST', path: '/basicOptional', handler: basicHandler, config: { auth: { mode: 'optional' } } },
-                { method: 'POST', path: '/basicScope', handler: basicHandler, config: { auth: { scope: 'x' } } },
-                { method: 'POST', path: '/basicArrayScope', handler: basicHandler, config: { auth: { scope: ['x', 'y'] } } },
-                { method: 'POST', path: '/basicArrayScopeA', handler: basicHandler, config: { auth: { scope: ['x', 'y', 'a'] } } },
-                { method: 'POST', path: '/basicTos', handler: basicHandler, config: { auth: { tos: '1.1.x' } } },
-                { method: 'POST', path: '/double', handler: doubleHandler }
-            ]);
+var doubleHandler = function (request, reply) {
 
-            done();
-        });
+    var options = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('john', '123:45') }, credentials: request.auth.credentials };
+
+    server.inject(options, function (res) {
+
+        reply(res.result);
     });
+};
 
-    it('returns a reply on successful auth', function (done) {
+var server = new Hapi.Server({ debug: false });
+before(function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('john', '123:45') } };
+    server.pack.register(require('../'), function (err) {
 
-        server.inject(request, function (res) {
+        expect(err).to.not.exist;
+        server.auth.strategy('default', 'basic', 'required', { validateFunc: loadUser });
 
-            expect(res.result).to.exist;
-            expect(res.result).to.equal('ok');
-            done();
-        });
+        server.route([
+            { method: 'POST', path: '/basic', handler: basicHandler, config: { auth: 'default' } },
+            { method: 'POST', path: '/basicOptional', handler: basicHandler, config: { auth: { mode: 'optional' } } },
+            { method: 'POST', path: '/basicScope', handler: basicHandler, config: { auth: { scope: 'x' } } },
+            { method: 'POST', path: '/basicArrayScope', handler: basicHandler, config: { auth: { scope: ['x', 'y'] } } },
+            { method: 'POST', path: '/basicArrayScopeA', handler: basicHandler, config: { auth: { scope: ['x', 'y', 'a'] } } },
+            { method: 'POST', path: '/basicTos', handler: basicHandler, config: { auth: { tos: '1.1.x' } } },
+            { method: 'POST', path: '/double', handler: doubleHandler }
+        ]);
+
+        done();
     });
+});
 
-    it('returns an error on wrong scheme', function (done) {
+it('returns a reply on successful auth', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: 'Steve something' } };
+    var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('john', '123:45') } };
 
-        server.inject(request, function (res) {
+    server.inject(request, function (res) {
 
-            expect(res.statusCode).to.equal(401);
-            done();
-        });
+        expect(res.result).to.exist;
+        expect(res.result).to.equal('ok');
+        done();
     });
+});
 
-    it('returns a reply on successful double auth', function (done) {
+it('returns an error on wrong scheme', function (done) {
 
-        var request = { method: 'POST', url: '/double', headers: { authorization: basicHeader('john', '123:45') } };
+    var request = { method: 'POST', url: '/basic', headers: { authorization: 'Steve something' } };
 
-        server.inject(request, function (res) {
+    server.inject(request, function (res) {
 
-            expect(res.result).to.exist;
-            expect(res.result).to.equal('ok');
-            done();
-        });
+        expect(res.statusCode).to.equal(401);
+        done();
     });
+});
 
-    it('returns a reply on failed optional auth', function (done) {
+it('returns a reply on successful double auth', function (done) {
 
-        var request = { method: 'POST', url: '/basicOptional' };
+    var request = { method: 'POST', url: '/double', headers: { authorization: basicHeader('john', '123:45') } };
 
-        server.inject(request, function (res) {
+    server.inject(request, function (res) {
 
-            expect(res.result).to.equal('ok');
-            done();
-        });
+        expect(res.result).to.exist;
+        expect(res.result).to.equal('ok');
+        done();
     });
+});
 
-    it('returns an error on bad password', function (done) {
+it('returns a reply on failed optional auth', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('john', 'abcd') } };
+    var request = { method: 'POST', url: '/basicOptional' };
 
-        server.inject(request, function (res) {
+    server.inject(request, function (res) {
 
-            expect(res.statusCode).to.equal(401);
-            done();
-        });
+        expect(res.result).to.equal('ok');
+        done();
     });
+});
 
-    it('returns an error on bad header format', function (done) {
+it('returns an error on bad password', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: 'basic' } };
+    var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('john', 'abcd') } };
 
-        server.inject(request, function (res) {
+    server.inject(request, function (res) {
 
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(400);
-            expect(res.result.isMissing).to.equal(undefined);
-            done();
-        });
+        expect(res.statusCode).to.equal(401);
+        done();
     });
+});
 
-    it('returns an error on bad header format', function (done) {
+it('returns an error on bad header format', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: 'basic' } };
+    var request = { method: 'POST', url: '/basic', headers: { authorization: 'basic' } };
 
-        server.inject(request, function (res) {
+    server.inject(request, function (res) {
 
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(400);
-            expect(res.result.isMissing).to.equal(undefined);
-            done();
-        });
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(400);
+        expect(res.result.isMissing).to.equal(undefined);
+        done();
     });
+});
 
-    it('returns an error on bad header internal syntax', function (done) {
+it('returns an error on bad header format', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: 'basic 123' } };
+    var request = { method: 'POST', url: '/basic', headers: { authorization: 'basic' } };
 
-        server.inject(request, function (res) {
+    server.inject(request, function (res) {
 
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(400);
-            expect(res.result.isMissing).to.equal(undefined);
-            done();
-        });
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(400);
+        expect(res.result.isMissing).to.equal(undefined);
+        done();
     });
+});
 
-    it('returns an error on missing username', function (done) {
+it('returns an error on bad header internal syntax', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('', '') } };
+    var request = { method: 'POST', url: '/basic', headers: { authorization: 'basic 123' } };
 
-        server.inject(request, function (res) {
+    server.inject(request, function (res) {
 
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(401);
-            done();
-        });
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(400);
+        expect(res.result.isMissing).to.equal(undefined);
+        done();
     });
+});
 
-    it('allow missing username', function (done) {
+it('returns an error on missing username', function (done) {
 
-        var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+    var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('', '') } };
 
-            expect(err).to.not.exist;
+    server.inject(request, function (res) {
 
-            server.auth.strategy('default', 'basic', {
-                validateFunc: function (username, password, callback) { callback(null, true, {}); },
-                allowEmptyUsername: true
-            });
-
-            server.route({ method: 'GET', path: '/', handler: function (request, reply) { reply('ok'); }, config: { auth: 'default' } });
-
-            server.inject({ method: 'GET', url: '/', headers: { authorization: basicHeader('', 'abcd') } }, function (res) {
-
-                expect(res.statusCode).to.equal(200);
-                done();
-            });
-        });
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(401);
+        done();
     });
+});
 
-    it('returns an error on unknown user', function (done) {
+it('allow missing username', function (done) {
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('doe', '123:45') } };
+    var server = new Hapi.Server();
+    server.pack.register(require('../'), function (err) {
 
-        server.inject(request, function (res) {
+        expect(err).to.not.exist;
 
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(401);
-            done();
+        server.auth.strategy('default', 'basic', {
+            validateFunc: function (username, password, callback) { callback(null, true, {}); },
+            allowEmptyUsername: true
         });
-    });
 
-    it('returns an error on internal user lookup error', function (done) {
+        server.route({ method: 'GET', path: '/', handler: function (request, reply) { reply('ok'); }, config: { auth: 'default' } });
 
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('jane', '123:45') } };
+        server.inject({ method: 'GET', url: '/', headers: { authorization: basicHeader('', 'abcd') } }, function (res) {
 
-        server.inject(request, function (res) {
-
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(500);
-            done();
-        });
-    });
-
-    it('returns an error on non-object credentials error', function (done) {
-
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('invalid1', '123:45') } };
-
-        server.inject(request, function (res) {
-
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(500);
-            done();
-        });
-    });
-
-    it('returns an error on missing credentials error', function (done) {
-
-        var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('invalid2', '123:45') } };
-
-        server.inject(request, function (res) {
-
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(500);
-            done();
-        });
-    });
-
-    it('returns an error on insufficient tos', function (done) {
-
-        var request = { method: 'POST', url: '/basicTos', headers: { authorization: basicHeader('john', '123:45') } };
-
-        server.inject(request, function (res) {
-
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(403);
-            done();
-        });
-    });
-
-    it('returns an error on insufficient scope', function (done) {
-
-        var request = { method: 'POST', url: '/basicScope', headers: { authorization: basicHeader('john', '123:45') } };
-
-        server.inject(request, function (res) {
-
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(403);
-            done();
-        });
-    });
-
-    it('returns an error on insufficient scope specified as an array', function (done) {
-
-        var request = { method: 'POST', url: '/basicArrayScope', headers: { authorization: basicHeader('john', '123:45') } };
-
-        server.inject(request, function (res) {
-
-            expect(res.result).to.exist;
-            expect(res.statusCode).to.equal(403);
-            done();
-        });
-    });
-
-    it('authenticates scope specified as an array', function (done) {
-
-        var request = { method: 'POST', url: '/basicArrayScopeA', headers: { authorization: basicHeader('john', '123:45') } };
-
-        server.inject(request, function (res) {
-
-            expect(res.result).to.exist;
             expect(res.statusCode).to.equal(200);
             done();
         });
     });
+});
 
-    it('should ask for credentials if server has one default strategy', function (done) {
+it('returns an error on unknown user', function (done) {
 
-        var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+    var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('doe', '123:45') } };
 
-            expect(err).to.not.exist;
+    server.inject(request, function (res) {
 
-            server.auth.strategy('default', 'basic', { validateFunc: loadUser });
-            server.route({
-                path: '/noauth',
-                method: 'GET',
-                config: {
-                    auth: 'default',
-                    handler: function (request, reply) {
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(401);
+        done();
+    });
+});
 
-                        reply('ok');
-                    }
+it('returns an error on internal user lookup error', function (done) {
+
+    var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('jane', '123:45') } };
+
+    server.inject(request, function (res) {
+
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(500);
+        done();
+    });
+});
+
+it('returns an error on non-object credentials error', function (done) {
+
+    var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('invalid1', '123:45') } };
+
+    server.inject(request, function (res) {
+
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(500);
+        done();
+    });
+});
+
+it('returns an error on missing credentials error', function (done) {
+
+    var request = { method: 'POST', url: '/basic', headers: { authorization: basicHeader('invalid2', '123:45') } };
+
+    server.inject(request, function (res) {
+
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(500);
+        done();
+    });
+});
+
+it('returns an error on insufficient tos', function (done) {
+
+    var request = { method: 'POST', url: '/basicTos', headers: { authorization: basicHeader('john', '123:45') } };
+
+    server.inject(request, function (res) {
+
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(403);
+        done();
+    });
+});
+
+it('returns an error on insufficient scope', function (done) {
+
+    var request = { method: 'POST', url: '/basicScope', headers: { authorization: basicHeader('john', '123:45') } };
+
+    server.inject(request, function (res) {
+
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(403);
+        done();
+    });
+});
+
+it('returns an error on insufficient scope specified as an array', function (done) {
+
+    var request = { method: 'POST', url: '/basicArrayScope', headers: { authorization: basicHeader('john', '123:45') } };
+
+    server.inject(request, function (res) {
+
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(403);
+        done();
+    });
+});
+
+it('authenticates scope specified as an array', function (done) {
+
+    var request = { method: 'POST', url: '/basicArrayScopeA', headers: { authorization: basicHeader('john', '123:45') } };
+
+    server.inject(request, function (res) {
+
+        expect(res.result).to.exist;
+        expect(res.statusCode).to.equal(200);
+        done();
+    });
+});
+
+it('should ask for credentials if server has one default strategy', function (done) {
+
+    var server = new Hapi.Server();
+    server.pack.register(require('../'), function (err) {
+
+        expect(err).to.not.exist;
+
+        server.auth.strategy('default', 'basic', { validateFunc: loadUser });
+        server.route({
+            path: '/noauth',
+            method: 'GET',
+            config: {
+                auth: 'default',
+                handler: function (request, reply) {
+
+                    reply('ok');
                 }
-            });
+            }
+        });
 
-            var validOptions = { method: 'GET', url: '/noauth', headers: { authorization: basicHeader('john', '123:45') } };
-            server.inject(validOptions, function (res) {
+        var validOptions = { method: 'GET', url: '/noauth', headers: { authorization: basicHeader('john', '123:45') } };
+        server.inject(validOptions, function (res) {
+
+            expect(res.result).to.exist;
+            expect(res.statusCode).to.equal(200);
+
+            server.inject('/noauth', function (res) {
 
                 expect(res.result).to.exist;
-                expect(res.statusCode).to.equal(200);
-
-                server.inject('/noauth', function (res) {
-
-                    expect(res.result).to.exist;
-                    expect(res.statusCode).to.equal(401);
-                    done();
-                });
+                expect(res.statusCode).to.equal(401);
+                done();
             });
         });
     });
+});
 
 
-    it('cannot add a route that has payload validation required', function (done) {
+it('cannot add a route that has payload validation required', function (done) {
 
-        var fn = function () {
+    var fn = function () {
 
-            server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: 'required' } } });
-        };
+        server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: 'required' } } });
+    };
 
-        expect(fn).to.throw(Error);
-        done();
-    });
+    expect(fn).to.throw(Error);
+    done();
+});
 
-    it('cannot add a route that has payload validation as optional', function (done) {
+it('cannot add a route that has payload validation as optional', function (done) {
 
-        var fn = function () {
+    var fn = function () {
 
-            server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: 'optional' } } });
-        };
+        server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: 'optional' } } });
+    };
 
-        expect(fn).to.throw(Error);
-        done();
-    });
+    expect(fn).to.throw(Error);
+    done();
+});
 
-    it('can add a route that has payload validation as none', function (done) {
+it('can add a route that has payload validation as none', function (done) {
 
-        var fn = function () {
+    var fn = function () {
 
-            server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: false } } });
-        };
+        server.route({ method: 'POST', path: '/basicPayload', handler: basicHandler, config: { auth: { mode: 'required', payload: false } } });
+    };
 
-        expect(fn).to.not.throw(Error);
-        done();
-    });
+    expect(fn).to.not.throw(Error);
+    done();
+});
 
-    it('passes non-error err in response', function (done) {
+it('passes non-error err in response', function (done) {
 
-        var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+    var server = new Hapi.Server();
+    server.pack.register(require('../'), function (err) {
 
-            expect(err).to.not.exist;
+        expect(err).to.not.exist;
 
-            server.auth.strategy('basic', 'basic', true, {
-                validateFunc: function (username, password, callback) {
+        server.auth.strategy('basic', 'basic', true, {
+            validateFunc: function (username, password, callback) {
 
-                    return callback({ some: 'value' }, false, null);
-                }
-            });
+                return callback({ some: 'value' }, false, null);
+            }
+        });
 
-            server.route({ method: 'GET', path: '/', handler: basicHandler })
+        server.route({ method: 'GET', path: '/', handler: basicHandler })
 
-            var request = { method: 'GET', url: '/', headers: { authorization: basicHeader('john', 'password') } };
+        var request = { method: 'GET', url: '/', headers: { authorization: basicHeader('john', 'password') } };
 
-            server.inject(request, function (res) {
+        server.inject(request, function (res) {
 
-                expect(res.result.some).to.equal('value');
-                expect(res.statusCode).to.equal(200);
-                done();
-            });
+            expect(res.result.some).to.equal('value');
+            expect(res.statusCode).to.equal(200);
+            done();
         });
     });
 });
