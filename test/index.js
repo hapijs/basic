@@ -4,11 +4,6 @@ var Lab = require('lab');
 var Hapi = require('hapi');
 
 
-// Declare internals
-
-var internals = {};
-
-
 // Test shortcuts
 
 var expect = Lab.expect;
