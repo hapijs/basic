@@ -2,7 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/hapijs/hapi-auth-basic.png)](http://travis-ci.org/hapijs/hapi-auth-basic)
 
-Lead Maintainer: [Bian Tan](https://github.com/biant)
+Lead Maintainer: [Eran Hammer](https://github.com/hueniverse)
 
 Basic authentication requires validating a username and password combination. The `'basic'` scheme takes the following options:
 
