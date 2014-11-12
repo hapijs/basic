@@ -1,8 +1,7 @@
 {
   "name": "hapi-auth-basic",
   "description": "Basic authentication plugin",
-  "version": "1.1.1",
-  "author": "Eran Hammer <eran@hammer.io> (http://hueniverse.com)",
+  "version": "1.1.2",
   "repository": "git://github.com/hapijs/hapi-auth-basic",
   "main": "index",
   "keywords": [
@@ -12,7 +11,7 @@
     "basic"
   ],
   "engines": {
-    "node": ">=0.10.30"
+    "node": ">=0.10.32"
   },
   "dependencies": {
     "boom": "2.x.x",
@@ -22,8 +21,9 @@
     "hapi": ">=2.x.x"
   },
   "devDependencies": {
-    "hapi": "6.x.x",
-    "lab": "3.x.x"
+    "code": "1.x.x",
+    "hapi": "7.x.x",
+    "lab": "5.x.x"
   },
   "scripts": {
     "test": "make test-cov"
