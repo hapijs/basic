@@ -23,7 +23,7 @@ it('returns a reply on successful auth', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
 
@@ -42,7 +42,7 @@ it('returns an error on wrong scheme', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
 
@@ -70,7 +70,7 @@ it('returns a reply on successful double auth', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: handler });
         server.route({ method: 'POST', path: '/inner', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
@@ -90,7 +90,7 @@ it('returns a reply on failed optional auth', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: { mode: 'optional' } } });
 
@@ -109,7 +109,7 @@ it('returns an error on bad password', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
 
@@ -128,7 +128,7 @@ it('returns an error on bad header format', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
 
@@ -149,7 +149,7 @@ it('returns an error on bad header format', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
 
@@ -170,7 +170,7 @@ it('returns an error on bad header internal syntax', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
 
@@ -191,7 +191,7 @@ it('returns an error on missing username', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
 
@@ -211,7 +211,7 @@ it('allow missing username', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
 
         server.auth.strategy('default', 'basic', {
             validateFunc: function (username, password, callback) { callback(null, true, {}); },
@@ -233,7 +233,7 @@ it('returns an error on unknown user', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
 
@@ -253,7 +253,7 @@ it('returns an error on internal user lookup error', function (done) {
     var server = new Hapi.Server({ debug: false });
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
 
@@ -273,7 +273,7 @@ it('returns an error on non-object credentials error', function (done) {
     var server = new Hapi.Server({ debug: false });
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
 
@@ -293,7 +293,7 @@ it('returns an error on missing credentials error', function (done) {
     var server = new Hapi.Server({ debug: false });
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
 
@@ -313,7 +313,7 @@ it('returns an error on insufficient scope', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: { scope: 'x' } } });
 
@@ -333,7 +333,7 @@ it('returns an error on insufficient scope specified as an array', function (don
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: { scope: ['x', 'y'] } } });
 
@@ -353,7 +353,7 @@ it('authenticates scope specified as an array', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: { scope: ['x', 'y', 'a'] } } });
 
@@ -373,7 +373,7 @@ it('should ask for credentials if server has one default strategy', function (do
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
 
         server.auth.strategy('default', 'basic', { validateFunc: internals.user });
         server.route({
@@ -410,7 +410,7 @@ it('cannot add a route that has payload validation required', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
 
         var fn = function () {
@@ -428,7 +428,7 @@ it('cannot add a route that has payload validation as optional', function (done)
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
 
         var fn = function () {
@@ -446,7 +446,7 @@ it('can add a route that has payload validation as none', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
 
         var fn = function () {
@@ -464,7 +464,7 @@ it('passes non-error err in response', function (done) {
     var server = new Hapi.Server();
     server.pack.register(require('../'), function (err) {
 
-        expect(err).to.not.exist;
+        expect(err).to.not.exist();
 
         server.auth.strategy('basic', 'basic', true, {
             validateFunc: function (username, password, callback) {
