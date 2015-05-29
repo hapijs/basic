@@ -1,6 +1,6 @@
 ### hapi-auth-basic
 
-[![Build Status](https://secure.travis-ci.org/hapijs/hapi-auth-basic.png)](http://travis-ci.org/hapijs/hapi-auth-basic)
+[![Build Status](https://secure.travis-ci.org/hapijs/hapi-auth-basic.svg)](http://travis-ci.org/hapijs/hapi-auth-basic)
 
 Lead Maintainer: [Eran Hammer](https://github.com/hueniverse)
 
