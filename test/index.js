@@ -488,7 +488,7 @@ it('passes non-error err in response', function (done) {
 
         expect(err).to.not.exist();
 
-        server.auth.strategy('default', 'basic', 'required', {
+        server.auth.strategy('basic', 'basic', true, {
             validateFunc: function (request, username, password, callback) {
 
                 return callback({ some: 'value' }, false, null);
