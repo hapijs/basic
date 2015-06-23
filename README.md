@@ -6,7 +6,8 @@ Lead Maintainer: [Eran Hammer](https://github.com/hueniverse)
 
 Basic authentication requires validating a username and password combination. The `'basic'` scheme takes the following options:
 
-- `validateFunc` - (required) a user lookup and password validation function with the signature `function(username, password, callback)` where:
+- `validateFunc` - (required) a user lookup and password validation function with the signature `function(request, username, password, callback)` where:
+    - `request` - is the Hapi request object of the request which is being authenticated.
     - `username` - the username received from the client.
     - `password` - the password received from the client.
     - `callback` - a callback function with the signature `function(err, isValid, credentials)` where:
@@ -29,7 +30,7 @@ var users = {
     }
 };
 
-var validate = function (username, password, callback) {
+var validate = function (request, username, password, callback) {
 
     var user = users[username];
     if (!user) {

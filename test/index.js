@@ -224,7 +224,7 @@ it('allow missing username', function (done) {
         expect(err).to.not.exist();
 
         server.auth.strategy('default', 'basic', {
-            validateFunc: function (username, password, callback) { callback(null, true, {}); },
+            validateFunc: function (request, username, password, callback) { callback(null, true, {}); },
             allowEmptyUsername: true
         });
 
@@ -488,14 +488,14 @@ it('passes non-error err in response', function (done) {
 
         expect(err).to.not.exist();
 
-        server.auth.strategy('basic', 'basic', true, {
-            validateFunc: function (username, password, callback) {
+        server.auth.strategy('default', 'basic', 'required', {
+            validateFunc: function (request, username, password, callback) {
 
                 return callback({ some: 'value' }, false, null);
             }
         });
 
-        server.route({ method: 'GET', path: '/', handler: function (request, reply) { return reply('ok'); } })
+        server.route({ method: 'GET', path: '/', handler: function (request, reply) { return reply('ok'); } });
 
         var request = { method: 'GET', url: '/', headers: { authorization: internals.header('john', 'password') } };
 
@@ -508,6 +508,33 @@ it('passes non-error err in response', function (done) {
     });
 });
 
+it('accepts request object in validateFunc', function (done) {
+
+    var server = new Hapi.Server();
+    server.connection();
+    server.register(require('../'), function (err) {
+
+        expect(err).to.not.exist();
+        server.auth.strategy('default', 'basic', 'required', {
+
+            validateFunc: function (request, username, password, callback) {
+
+                expect(request).to.be.object();
+                done();
+                return;
+            }
+        });
+        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+
+        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+
+        server.inject(request, function (res) {
+
+            //done();
+        });
+    });
+});
+
 
 internals.header = function (username, password) {
 
@@ -515,7 +542,7 @@ internals.header = function (username, password) {
 };
 
 
-internals.user = function (username, password, callback) {
+internals.user = function (request, username, password, callback) {
 
     if (username === 'john') {
         return callback(null, password === '123:45', {
