@@ -26,7 +26,17 @@ it('returns a reply on successful auth', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
@@ -46,7 +56,17 @@ it('returns an error on wrong scheme', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: 'Steve something' } };
 
@@ -76,7 +96,17 @@ it('returns a reply on successful double auth', function (done) {
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
         server.route({ method: 'POST', path: '/', handler: handler });
-        server.route({ method: 'POST', path: '/inner', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/inner',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
@@ -96,7 +126,19 @@ it('returns a reply on failed optional auth', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: { mode: 'optional' } } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: {
+                    mode: 'optional'
+                }
+            }
+        });
 
         var request = { method: 'POST', url: '/' };
 
@@ -116,7 +158,17 @@ it('returns an error on bad password', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', 'abcd') } };
 
@@ -136,7 +188,17 @@ it('returns an error on bad header format', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: 'basic' } };
 
@@ -158,7 +220,17 @@ it('returns an error on bad header internal syntax', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: 'basic 123' } };
 
@@ -180,7 +252,17 @@ it('returns an error on missing username', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('', '') } };
 
@@ -202,11 +284,24 @@ it('allow missing username', function (done) {
         expect(err).to.not.exist();
 
         server.auth.strategy('default', 'basic', {
-            validateFunc: function (request, username, password, callback) { callback(null, true, {}); },
+            validateFunc: function (request, username, password, callback) {
+
+                callback(null, true, {});
+            },
             allowEmptyUsername: true
         });
 
-        server.route({ method: 'GET', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'GET',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         server.inject({ method: 'GET', url: '/', headers: { authorization: internals.header('', 'abcd') } }, function (res) {
 
@@ -224,7 +319,17 @@ it('returns an error on unknown user', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('doe', '123:45') } };
 
@@ -245,7 +350,17 @@ it('returns an error on internal user lookup error', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('jane', '123:45') } };
 
@@ -266,7 +381,17 @@ it('returns an error on non-object credentials error', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('invalid1', '123:45') } };
 
@@ -287,7 +412,17 @@ it('returns an error on missing credentials error', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('invalid2', '123:45') } };
 
@@ -308,7 +443,19 @@ it('returns an error on insufficient scope', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: { scope: 'x' } } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: {
+                    scope: 'x'
+                }
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
@@ -329,7 +476,19 @@ it('returns an error on insufficient scope specified as an array', function (don
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: { scope: ['x', 'y'] } } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: {
+                    scope: ['x', 'y']
+                }
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
@@ -350,7 +509,19 @@ it('authenticates scope specified as an array', function (done) {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: { scope: ['x', 'y', 'a'] } } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: {
+                    scope: ['x', 'y', 'a']
+                }
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
@@ -385,15 +556,15 @@ it('should ask for credentials if server has one default strategy', function (do
         });
 
         var validOptions = { method: 'GET', url: '/', headers: { authorization: internals.header('john', '123:45') } };
-        server.inject(validOptions, function (res) {
+        server.inject(validOptions, function (res1) {
 
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(200);
+            expect(res1.result).to.exist();
+            expect(res1.statusCode).to.equal(200);
 
-            server.inject('/', function (res) {
+            server.inject('/', function (res2) {
 
-                expect(res.result).to.exist();
-                expect(res.statusCode).to.equal(401);
+                expect(res2.result).to.exist();
+                expect(res2.statusCode).to.equal(401);
                 done();
             });
         });
@@ -412,7 +583,20 @@ it('cannot add a route that has payload validation required', function (done) {
 
         var fn = function () {
 
-            server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: { mode: 'required', payload: 'required' } } });
+            server.route({
+                method: 'POST',
+                path: '/',
+                handler: function (request, reply) {
+
+                    return reply('ok');
+                },
+                config: {
+                    auth: {
+                        mode: 'required',
+                        payload: 'required'
+                    }
+                }
+            });
         };
 
         expect(fn).to.throw('Payload validation can only be required when all strategies support it in path: /');
@@ -431,7 +615,20 @@ it('cannot add a route that has payload validation as optional', function (done)
 
         var fn = function () {
 
-            server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: { mode: 'required', payload: 'optional' } } });
+            server.route({
+                method: 'POST',
+                path: '/',
+                handler: function (request, reply) {
+
+                    return reply('ok');
+                },
+                config: {
+                    auth: {
+                        mode: 'required',
+                        payload: 'optional'
+                    }
+                }
+            });
         };
 
         expect(fn).to.throw('Payload authentication requires at least one strategy with payload support in path: /');
@@ -450,7 +647,20 @@ it('can add a route that has payload validation as none', function (done) {
 
         var fn = function () {
 
-            server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: { mode: 'required', payload: false } } });
+            server.route({
+                method: 'POST',
+                path: '/',
+                handler: function (request, reply) {
+
+                    return reply('ok');
+                },
+                config: {
+                    auth: {
+                        mode: 'required',
+                        payload: false
+                    }
+                }
+            });
         };
 
         expect(fn).to.not.throw();
@@ -473,7 +683,14 @@ it('passes non-error err in response', function (done) {
             }
         });
 
-        server.route({ method: 'GET', path: '/', handler: function (request, reply) { return reply('ok'); } });
+        server.route({
+            method: 'GET',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            }
+        });
 
         var request = { method: 'GET', url: '/', headers: { authorization: internals.header('john', 'password') } };
 
@@ -502,7 +719,17 @@ it('accepts request object in validateFunc', function (done) {
                 return;
             }
         });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
 
         var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
@@ -529,13 +756,16 @@ internals.user = function (request, username, password, callback) {
             tos: '1.0.0'
         });
     }
-    else if (username === 'jane') {
+
+    if (username === 'jane') {
         return callback(Hapi.error.internal('boom'));
     }
-    else if (username === 'invalid1') {
+
+    if (username === 'invalid1') {
         return callback(null, true, 'bad');
     }
-    else if (username === 'invalid2') {
+
+    if (username === 'invalid2') {
         return callback(null, true, null);
     }
 
