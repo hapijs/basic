@@ -473,7 +473,7 @@ it('passes non-error err in response', function (done) {
             }
         });
 
-        server.route({ method: 'GET', path: '/', handler: function (request, reply) { return reply('ok'); } })
+        server.route({ method: 'GET', path: '/', handler: function (request, reply) { return reply('ok'); } });
 
         var request = { method: 'GET', url: '/', headers: { authorization: internals.header('john', 'password') } };
 
@@ -481,6 +481,37 @@ it('passes non-error err in response', function (done) {
 
             expect(res.result.some).to.equal('value');
             expect(res.statusCode).to.equal(200);
+            done();
+        });
+    });
+});
+
+it('accepts optional request object in validateFunc', function (done) {
+
+    var server = new Hapi.Server();
+    server.connection();
+    server.register(require('../'), function (err) {
+
+        expect(err).to.not.exist();
+        server.auth.strategy('default', 'basic', 'required', { validateFunc: function (username, password, request, callback) {
+
+            expect(request).to.exist();
+
+            expect(request.method).to.equal('post');
+
+            return callback(null, password === '123:45', {
+                user: 'john',
+                scope: ['a'],
+                tos: '1.0.0'
+            });
+        }});
+        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
+
+        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+
+        server.inject(request, function (res) {
+
+            expect(res.result).to.equal('ok');
             done();
         });
     });
