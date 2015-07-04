@@ -486,6 +486,32 @@ it('passes non-error err in response', function (done) {
     });
 });
 
+it('does not pass err in response', function (done) {
+
+    var server = new Hapi.Server();
+    server.connection();
+    server.register(require('../'), function (err) {
+
+        expect(err).to.not.exist();
+
+        server.auth.strategy('basic', 'basic', true, {
+            validateFunc: function (username, password, callback) {
+
+                return callback(new Error('test error'), false, null);
+            }
+        });
+
+        server.route({ method: 'GET', path: '/', handler: function (request, reply) { return reply('ok'); } })
+
+        var request = { method: 'GET', url: '/', headers: { authorization: internals.header('john', 'password') } };
+
+        server.inject(request, function (res) {
+
+            expect(res.statusCode).to.equal(401);
+            done();
+        });
+    });
+});
 
 internals.header = function (username, password) {
 
