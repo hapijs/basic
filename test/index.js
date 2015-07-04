@@ -150,28 +150,6 @@ it('returns an error on bad header format', function (done) {
     });
 });
 
-it('returns an error on bad header format', function (done) {
-
-    var server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), function (err) {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: function (request, reply) { return reply('ok'); }, config: { auth: 'default' } });
-
-        var request = { method: 'POST', url: '/', headers: { authorization: 'basic' } };
-
-        server.inject(request, function (res) {
-
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(400);
-            expect(res.result.isMissing).to.equal(undefined);
-            done();
-        });
-    });
-});
-
 it('returns an error on bad header internal syntax', function (done) {
 
     var server = new Hapi.Server();
