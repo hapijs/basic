@@ -1,27 +1,29 @@
+'use strict';
+
 // Load modules
 
-var Code = require('code');
-var Hapi = require('hapi');
-var Lab = require('lab');
+const Code = require('code');
+const Hapi = require('hapi');
+const Lab = require('lab');
 
 
 // Declare internals
 
-var internals = {};
+const internals = {};
 
 
 // Test shortcuts
 
-var lab = exports.lab = Lab.script();
-var it = lab.it;
-var expect = Code.expect;
+const lab = exports.lab = Lab.script();
+const it = lab.it;
+const expect = Code.expect;
 
 
-it('returns a reply on successful auth', function (done) {
+it('returns a reply on successful auth', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -37,9 +39,9 @@ it('returns a reply on successful auth', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.equal('ok');
             done();
@@ -47,11 +49,11 @@ it('returns a reply on successful auth', function (done) {
     });
 });
 
-it('returns an error on wrong scheme', function (done) {
+it('returns an error on wrong scheme', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -67,9 +69,9 @@ it('returns an error on wrong scheme', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: 'Steve something' } };
+        const request = { method: 'POST', url: '/', headers: { authorization: 'Steve something' } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.statusCode).to.equal(401);
             done();
@@ -77,20 +79,20 @@ it('returns an error on wrong scheme', function (done) {
     });
 });
 
-it('returns a reply on successful double auth', function (done) {
+it('returns a reply on successful double auth', (done) => {
 
-    var handler = function (request, reply) {
+    const handler = function (request, reply) {
 
-        var options = { method: 'POST', url: '/inner', headers: { authorization: internals.header('john', '123:45') }, credentials: request.auth.credentials };
-        server.inject(options, function (res) {
+        const options = { method: 'POST', url: '/inner', headers: { authorization: internals.header('john', '123:45') }, credentials: request.auth.credentials };
+        server.inject(options, (res) => {
 
             return reply(res.result);
         });
     };
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -107,9 +109,9 @@ it('returns a reply on successful double auth', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.equal('ok');
             done();
@@ -117,11 +119,11 @@ it('returns a reply on successful double auth', function (done) {
     });
 });
 
-it('returns a reply on failed optional auth', function (done) {
+it('returns a reply on failed optional auth', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -139,9 +141,9 @@ it('returns a reply on failed optional auth', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/' };
+        const request = { method: 'POST', url: '/' };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.equal('ok');
             done();
@@ -149,11 +151,11 @@ it('returns a reply on failed optional auth', function (done) {
     });
 });
 
-it('returns an error on bad password', function (done) {
+it('returns an error on bad password', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -169,9 +171,9 @@ it('returns an error on bad password', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', 'abcd') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', 'abcd') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.statusCode).to.equal(401);
             done();
@@ -179,11 +181,11 @@ it('returns an error on bad password', function (done) {
     });
 });
 
-it('returns an error on bad header format', function (done) {
+it('returns an error on bad header format', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -199,9 +201,9 @@ it('returns an error on bad header format', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: 'basic' } };
+        const request = { method: 'POST', url: '/', headers: { authorization: 'basic' } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.exist();
             expect(res.statusCode).to.equal(400);
@@ -211,11 +213,11 @@ it('returns an error on bad header format', function (done) {
     });
 });
 
-it('returns an error on bad header internal syntax', function (done) {
+it('returns an error on bad header internal syntax', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -231,9 +233,9 @@ it('returns an error on bad header internal syntax', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: 'basic 123' } };
+        const request = { method: 'POST', url: '/', headers: { authorization: 'basic 123' } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.exist();
             expect(res.statusCode).to.equal(400);
@@ -243,11 +245,11 @@ it('returns an error on bad header internal syntax', function (done) {
     });
 });
 
-it('returns an error on missing username', function (done) {
+it('returns an error on missing username', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -263,9 +265,9 @@ it('returns an error on missing username', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('', '') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('', '') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.exist();
             expect(res.statusCode).to.equal(401);
@@ -274,11 +276,11 @@ it('returns an error on missing username', function (done) {
     });
 });
 
-it('allow missing username', function (done) {
+it('allow missing username', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
 
@@ -302,7 +304,7 @@ it('allow missing username', function (done) {
             }
         });
 
-        server.inject({ method: 'GET', url: '/', headers: { authorization: internals.header('', 'abcd') } }, function (res) {
+        server.inject({ method: 'GET', url: '/', headers: { authorization: internals.header('', 'abcd') } }, (res) => {
 
             expect(res.statusCode).to.equal(200);
             done();
@@ -310,11 +312,11 @@ it('allow missing username', function (done) {
     });
 });
 
-it('returns an error on unknown user', function (done) {
+it('returns an error on unknown user', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -330,9 +332,9 @@ it('returns an error on unknown user', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('doe', '123:45') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('doe', '123:45') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.exist();
             expect(res.statusCode).to.equal(401);
@@ -341,11 +343,11 @@ it('returns an error on unknown user', function (done) {
     });
 });
 
-it('returns an error on internal user lookup error', function (done) {
+it('returns an error on internal user lookup error', (done) => {
 
-    var server = new Hapi.Server({ debug: false });
+    const server = new Hapi.Server({ debug: false });
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -361,9 +363,9 @@ it('returns an error on internal user lookup error', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('jane', '123:45') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('jane', '123:45') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.exist();
             expect(res.statusCode).to.equal(500);
@@ -372,11 +374,11 @@ it('returns an error on internal user lookup error', function (done) {
     });
 });
 
-it('returns an error on non-object credentials error', function (done) {
+it('returns an error on non-object credentials error', (done) => {
 
-    var server = new Hapi.Server({ debug: false });
+    const server = new Hapi.Server({ debug: false });
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -392,9 +394,9 @@ it('returns an error on non-object credentials error', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('invalid1', '123:45') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('invalid1', '123:45') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.exist();
             expect(res.statusCode).to.equal(500);
@@ -403,11 +405,11 @@ it('returns an error on non-object credentials error', function (done) {
     });
 });
 
-it('returns an error on missing credentials error', function (done) {
+it('returns an error on missing credentials error', (done) => {
 
-    var server = new Hapi.Server({ debug: false });
+    const server = new Hapi.Server({ debug: false });
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -423,9 +425,9 @@ it('returns an error on missing credentials error', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('invalid2', '123:45') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('invalid2', '123:45') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.exist();
             expect(res.statusCode).to.equal(500);
@@ -434,11 +436,11 @@ it('returns an error on missing credentials error', function (done) {
     });
 });
 
-it('returns an error on insufficient scope', function (done) {
+it('returns an error on insufficient scope', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -456,9 +458,9 @@ it('returns an error on insufficient scope', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.exist();
             expect(res.statusCode).to.equal(403);
@@ -467,11 +469,11 @@ it('returns an error on insufficient scope', function (done) {
     });
 });
 
-it('returns an error on insufficient scope specified as an array', function (done) {
+it('returns an error on insufficient scope specified as an array', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -489,9 +491,9 @@ it('returns an error on insufficient scope specified as an array', function (don
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.exist();
             expect(res.statusCode).to.equal(403);
@@ -500,11 +502,11 @@ it('returns an error on insufficient scope specified as an array', function (don
     });
 });
 
-it('authenticates scope specified as an array', function (done) {
+it('authenticates scope specified as an array', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
@@ -522,9 +524,9 @@ it('authenticates scope specified as an array', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result).to.exist();
             expect(res.statusCode).to.equal(200);
@@ -533,11 +535,11 @@ it('authenticates scope specified as an array', function (done) {
     });
 });
 
-it('should ask for credentials if server has one default strategy', function (done) {
+it('should ask for credentials if server has one default strategy', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
 
@@ -554,13 +556,13 @@ it('should ask for credentials if server has one default strategy', function (do
             }
         });
 
-        var validOptions = { method: 'GET', url: '/', headers: { authorization: internals.header('john', '123:45') } };
-        server.inject(validOptions, function (res1) {
+        const validOptions = { method: 'GET', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+        server.inject(validOptions, (res1) => {
 
             expect(res1.result).to.exist();
             expect(res1.statusCode).to.equal(200);
 
-            server.inject('/', function (res2) {
+            server.inject('/', (res2) => {
 
                 expect(res2.result).to.exist();
                 expect(res2.statusCode).to.equal(401);
@@ -571,16 +573,16 @@ it('should ask for credentials if server has one default strategy', function (do
 });
 
 
-it('cannot add a route that has payload validation required', function (done) {
+it('cannot add a route that has payload validation required', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
 
-        var fn = function () {
+        const fn = function () {
 
             server.route({
                 method: 'POST',
@@ -603,16 +605,16 @@ it('cannot add a route that has payload validation required', function (done) {
     });
 });
 
-it('cannot add a route that has payload validation as optional', function (done) {
+it('cannot add a route that has payload validation as optional', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
 
-        var fn = function () {
+        const fn = function () {
 
             server.route({
                 method: 'POST',
@@ -635,16 +637,16 @@ it('cannot add a route that has payload validation as optional', function (done)
     });
 });
 
-it('can add a route that has payload validation as none', function (done) {
+it('can add a route that has payload validation as none', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
 
-        var fn = function () {
+        const fn = function () {
 
             server.route({
                 method: 'POST',
@@ -667,11 +669,11 @@ it('can add a route that has payload validation as none', function (done) {
     });
 });
 
-it('passes non-error err in response', function (done) {
+it('passes non-error err in response', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
 
@@ -691,9 +693,9 @@ it('passes non-error err in response', function (done) {
             }
         });
 
-        var request = { method: 'GET', url: '/', headers: { authorization: internals.header('john', 'password') } };
+        const request = { method: 'GET', url: '/', headers: { authorization: internals.header('john', 'password') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             expect(res.result.some).to.equal('value');
             expect(res.statusCode).to.equal(200);
@@ -702,11 +704,11 @@ it('passes non-error err in response', function (done) {
     });
 });
 
-it('accepts request object in validateFunc', function (done) {
+it('accepts request object in validateFunc', (done) => {
 
-    var server = new Hapi.Server();
+    const server = new Hapi.Server();
     server.connection();
-    server.register(require('../'), function (err) {
+    server.register(require('../'), (err) => {
 
         expect(err).to.not.exist();
         server.auth.strategy('default', 'basic', 'required', {
@@ -730,9 +732,9 @@ it('accepts request object in validateFunc', function (done) {
             }
         });
 
-        var request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
 
-        server.inject(request, function (res) {
+        server.inject(request, (res) => {
 
             //done();
         });
