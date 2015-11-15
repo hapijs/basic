@@ -17,6 +17,7 @@ Basic authentication requires validating a username and password combination. Th
           included when `isValid` is `true`, but there are cases when the application needs to know who tried to authenticate even when it fails
           (e.g. with authentication mode `'try'`).
 - `allowEmptyUsername` - (optional) if `true`, allows making requests with an empty username. Defaults to `false`.
+- `unauthorizedAttributes` - (optional) if set, passed directly to [Boom.unauthorized](https://github.com/hapijs/boom#boomunauthorizedmessage-scheme-attributes). Useful for setting realm attribute in WWW-Authenticate header. Defaults to `undefined`.
 
 ```javascript
 const Bcrypt = require('bcrypt');
