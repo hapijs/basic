@@ -741,6 +741,41 @@ it('accepts request object in validateFunc', (done) => {
     });
 });
 
+it('includes additional attributes in WWW-Authenticate header', (done) => {
+
+    const server = new Hapi.Server();
+    server.connection();
+    server.register(require('../'), (err) => {
+
+        expect(err).to.not.exist();
+        server.auth.strategy('default', 'basic', 'required', {
+            validateFunc: internals.user,
+            unauthorizedAttributes: { realm: 'hapi' }
+        });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
+
+        const request = { method: 'POST', url: '/' };
+
+        server.inject(request, (res) => {
+
+            const wwwAuth = 'www-authenticate';
+            expect(res.headers).to.include(wwwAuth);
+            expect(res.headers[wwwAuth]).to.equal('Basic realm=\"hapi\"');
+            done();
+        });
+    });
+});
+
 
 internals.header = function (username, password) {
 
