@@ -11,7 +11,7 @@ Basic authentication requires validating a username and password combination. Th
     - `username` - the username received from the client.
     - `password` - the password received from the client.
     - `callback` - a callback function with the signature `function(err, isValid, credentials)` where:
-        - `err` - an internal error. If defined will replace default Boom.unauthorized error
+        - `err` - an internal error. If defined will replace default `Boom.unauthorized` error
         - `isValid` - `true` if both the username was found and the password matched, otherwise `false`.
         - `credentials` - a credentials object passed back to the application in `request.auth.credentials`. Typically, `credentials` are only
           included when `isValid` is `true`, but there are cases when the application needs to know who tried to authenticate even when it fails
