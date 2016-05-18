@@ -600,7 +600,7 @@ it('cannot add a route that has payload validation required', (done) => {
             });
         };
 
-        expect(fn).to.throw('Payload validation can only be required when all strategies support it in path: /');
+        expect(fn).to.throw('Payload validation can only be required when all strategies support it in /');
         done();
     });
 });
@@ -632,7 +632,7 @@ it('cannot add a route that has payload validation as optional', (done) => {
             });
         };
 
-        expect(fn).to.throw('Payload authentication requires at least one strategy with payload support in path: /');
+        expect(fn).to.throw('Payload authentication requires at least one strategy with payload support in /');
         done();
     });
 });
