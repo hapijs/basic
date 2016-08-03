@@ -17,6 +17,7 @@ Basic authentication requires validating a username and password combination. Th
           included when `isValid` is `true`, but there are cases when the application needs to know who tried to authenticate even when it fails
           (e.g. with authentication mode `'try'`).
 - `allowEmptyUsername` - (optional) if `true`, allows making requests with an empty username. Defaults to `false`.
+- `wwwAuth` - (optional) if set, the header value for WWW-Authenticate would be replaced instead of the usual `WWW-Authenticate: Basic` during a [Boom.unauthorized](https://github.com/hapijs/boom#boomunauthorizedmessage-scheme-attributes). Customizing this field prevents browsers from showing a default popup.
 - `unauthorizedAttributes` - (optional) if set, passed directly to [Boom.unauthorized](https://github.com/hapijs/boom#boomunauthorizedmessage-scheme-attributes) if no custom `err` is defined. Useful for setting realm attribute in WWW-Authenticate header. Defaults to `undefined`.
 
 ```javascript
