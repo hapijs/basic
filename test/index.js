@@ -776,6 +776,42 @@ it('includes additional attributes in WWW-Authenticate header', (done) => {
     });
 });
 
+it('includes support for customization of the WWW-Authenticate response header value', (done) => {
+
+    const server = new Hapi.Server();
+    server.connection();
+    server.register(require('../'), (err) => {
+
+        expect(err).to.not.exist();
+        server.auth.strategy('default', 'basic', 'required', {
+            validateFunc: internals.user,
+            wwwAuth: 'xBasic',
+            unauthorizedAttributes: { realm: 'hapi' }
+        });
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, reply) {
+
+                return reply('ok');
+            },
+            config: {
+                auth: 'default'
+            }
+        });
+
+        const request = { method: 'POST', url: '/' };
+
+        server.inject(request, (res) => {
+
+            const wwwAuth = 'www-authenticate';
+            expect(res.headers).to.include(wwwAuth);
+            expect(res.headers[wwwAuth]).to.equal('xBasic realm=\"hapi\"');
+            done();
+        });
+    });
+});
+
 
 internals.header = function (username, password) {
 
