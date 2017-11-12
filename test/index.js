@@ -22,7 +22,7 @@ const expect = Code.expect;
 
 it('returns a reply on successful auth', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
     server.auth.strategy('default', 'basic', { validate: internals.user });
 
@@ -46,7 +46,7 @@ it('returns a reply on successful auth', async () => {
 
 it('returns an error on wrong scheme', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
     server.auth.strategy('default', 'basic', { validate: internals.user });
 
@@ -78,7 +78,7 @@ it('returns a reply on successful double auth', async () => {
         return res.result;
     };
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -105,7 +105,7 @@ it('returns a reply on successful double auth', async () => {
 
 it('returns a reply on failed optional auth', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
 
     await server.register(require('../'));
 
@@ -133,7 +133,7 @@ it('returns a reply on failed optional auth', async () => {
 
 it('returns an error on bad password', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -157,7 +157,7 @@ it('returns an error on bad password', async () => {
 
 it('returns an error on bad header format', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -184,7 +184,7 @@ it('returns an error on bad header format', async () => {
 
 it('returns an error on bad header internal syntax', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -211,7 +211,7 @@ it('returns an error on bad header internal syntax', async () => {
 
 it('returns an error on missing username', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -237,7 +237,7 @@ it('returns an error on missing username', async () => {
 
 it('allow missing username', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', {
@@ -264,7 +264,7 @@ it('allow missing username', async () => {
 
 it('returns an error on unknown user', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -289,7 +289,7 @@ it('returns an error on unknown user', async () => {
 
 it('replies with thrown custom error', async () => {
 
-    const server = new Hapi.Server({ debug: false });
+    const server = Hapi.server({ debug: false });
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -316,7 +316,7 @@ it('replies with thrown custom error', async () => {
 
 it('replies with takeover response', async () => {
 
-    const server = new Hapi.Server({ debug: false });
+    const server = Hapi.server({ debug: false });
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -342,7 +342,7 @@ it('replies with takeover response', async () => {
 
 it('returns an error on non-object credentials error', async () => {
 
-    const server = new Hapi.Server({ debug: false });
+    const server = Hapi.server({ debug: false });
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -368,7 +368,7 @@ it('returns an error on non-object credentials error', async () => {
 
 it('returns an error on missing credentials error', async () => {
 
-    const server = new Hapi.Server({ debug: false });
+    const server = Hapi.server({ debug: false });
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -394,7 +394,7 @@ it('returns an error on missing credentials error', async () => {
 
 it('returns an error on insufficient scope', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -423,7 +423,7 @@ it('returns an error on insufficient scope', async () => {
 
 it('returns an error on insufficient scope specified as an array', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -453,7 +453,7 @@ it('returns an error on insufficient scope specified as an array', async () => {
 
 it('authenticates scope specified as an array', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -482,7 +482,7 @@ it('authenticates scope specified as an array', async () => {
 
 it('should ask for credentials if server has one default strategy', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
 
@@ -514,7 +514,7 @@ it('should ask for credentials if server has one default strategy', async () => 
 
 it('cannot add a route that has payload validation required', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -543,7 +543,7 @@ it('cannot add a route that has payload validation required', async () => {
 
 it('cannot add a route that has payload validation as optional', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -572,7 +572,7 @@ it('cannot add a route that has payload validation as optional', async () => {
 
 it('can add a route that has payload validation as none', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
@@ -601,7 +601,7 @@ it('can add a route that has payload validation as none', async () => {
 
 it('includes additional attributes in WWW-Authenticate header', async () => {
 
-    const server = new Hapi.Server();
+    const server = Hapi.server();
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', {

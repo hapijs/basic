@@ -33,7 +33,7 @@ const users = {
     }
 };
 
-const validate = async (request, username, password, h) => {
+const validate = async (request, username, password) => {
 
     const user = users[username];
     if (!user) {
@@ -48,7 +48,7 @@ const validate = async (request, username, password, h) => {
 
 const main = async () => {
 
-    const server = new Hapi.Server({ port: 4000 });
+    const server = Hapi.server({ port: 4000 });
 
     await server.register(require('.'));
 
