@@ -314,7 +314,7 @@ it('replies with thrown custom error', async () => {
     expect(res.statusCode).to.equal(400);
 });
 
-it('replies with takeover response', async () => {
+it('replies with response response', async () => {
 
     const server = Hapi.server({ debug: false });
     await server.register(require('../'));
@@ -655,7 +655,7 @@ internals.user = async function (request, username, password, h) {
     }
 
     if (username === 'bob') {
-        return await Promise.resolve({ takeover: h.redirect('https://hapijs.com') });
+        return await Promise.resolve({ response: h.redirect('https://hapijs.com') });
     }
 
     if (username === 'invalid1') {
