@@ -33,7 +33,11 @@ const users = {
     }
 };
 
-const validate = async (request, username, password) => {
+const validate = async (request, username, password, h) => {
+
+    if (username === 'help') {
+        return { response: h.redirect('https://hapijs.com/help') };     // custom response
+    }
 
     const user = users[username];
     if (!user) {
@@ -50,7 +54,7 @@ const main = async () => {
 
     const server = Hapi.server({ port: 4000 });
 
-    await server.register(require('.'));
+    await server.register(require('hapi-auth-basic'));
 
     server.auth.strategy('simple', 'basic', { validate });
     server.auth.default('simple');
