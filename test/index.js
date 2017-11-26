@@ -2,6 +2,7 @@
 
 // Load modules
 
+const Boom = require('boom');
 const Code = require('code');
 const Hapi = require('hapi');
 const Lab = require('lab');
@@ -19,761 +20,614 @@ const it = lab.it;
 const expect = Code.expect;
 
 
-it('returns a reply on successful auth', (done) => {
+it('returns a reply on successful auth', async () => {
 
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
+    const server = Hapi.server();
+    await server.register(require('../'));
+    server.auth.strategy('default', 'basic', { validate: internals.user });
 
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
 
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.equal('ok');
-            done();
-        });
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
     });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+    const res = await server.inject(request);
+
+    expect(res.result).to.equal('ok');
 });
 
-it('returns an error on wrong scheme', (done) => {
+it('returns an error on wrong scheme', async () => {
 
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
+    const server = Hapi.server();
+    await server.register(require('../'));
+    server.auth.strategy('default', 'basic', { validate: internals.user });
 
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
 
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: 'Steve something' } };
-
-        server.inject(request, (res) => {
-
-            expect(res.statusCode).to.equal(401);
-            done();
-        });
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
     });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: 'Steve something' } };
+    const res = await server.inject(request);
+
+    expect(res.statusCode).to.equal(401);
 });
 
-it('returns a reply on successful double auth', (done) => {
+it('returns a reply on successful double auth', async () => {
 
-    const handler = function (request, reply) {
+    const handler = async function (request, h) {
 
         const options = { method: 'POST', url: '/inner', headers: { authorization: internals.header('john', '123:45') }, credentials: request.auth.credentials };
-        server.inject(options, (res) => {
+        const res = await server.inject(options);
 
-            return reply(res.result);
+        return res.result;
+    };
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+
+    server.route({ method: 'POST', path: '/', handler });
+    server.route({
+        method: 'POST',
+        path: '/inner',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+
+    const res = await server.inject(request);
+
+    expect(res.result).to.equal('ok');
+});
+
+it('returns a reply on failed optional auth', async () => {
+
+    const server = Hapi.server();
+
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: {
+                strategy: 'default',
+                mode: 'optional'
+            }
+        }
+    });
+
+    const request = { method: 'POST', url: '/' };
+
+    const res = await server.inject(request);
+    expect(res.result).to.equal('ok');
+});
+
+it('returns an error on bad password', async () => {
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', 'abcd') } };
+
+    const res = await server.inject(request);
+    expect(res.statusCode).to.equal(401);
+});
+
+it('returns an error on bad header format', async () => {
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: 'basic' } };
+
+    const res = await server.inject(request);
+
+    expect(res.result).to.exist();
+    expect(res.statusCode).to.equal(400);
+    expect(res.result.isMissing).to.equal(undefined);
+});
+
+it('returns an error on bad header internal syntax', async () => {
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: 'basic 123' } };
+
+    const res = await server.inject(request);
+
+    expect(res.result).to.exist();
+    expect(res.statusCode).to.equal(400);
+    expect(res.result.isMissing).to.equal(undefined);
+});
+
+it('returns an error on missing username', async () => {
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('', '') } };
+
+    const res = await server.inject(request);
+
+    expect(res.result).to.exist();
+    expect(res.statusCode).to.equal(401);
+});
+
+it('allow missing username', async () => {
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', {
+        validate: () => ({ isValid: true, credentials: {} }),
+        allowEmptyUsername: true
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
+    });
+
+    const res = await server.inject({ method: 'GET', url: '/', headers: { authorization: internals.header('', 'abcd') } });
+
+    expect(res.statusCode).to.equal(200);
+});
+
+it('returns an error on unknown user', async () => {
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('doe', '123:45') } };
+    const res = await server.inject(request);
+
+    expect(res.result).to.exist();
+    expect(res.statusCode).to.equal(401);
+});
+
+it('replies with thrown custom error', async () => {
+
+    const server = Hapi.server({ debug: false });
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('jane', '123:45') } };
+
+    const res = await server.inject(request);
+
+    expect(res.result).to.exist();
+    expect(res.result.message).to.equal('Some other problem');
+    expect(res.statusCode).to.equal(400);
+});
+
+it('replies with response response', async () => {
+
+    const server = Hapi.server({ debug: false });
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('bob', '123:45') } };
+
+    const res = await server.inject(request);
+
+    expect(res.statusCode).to.equal(302);
+    expect(res.headers.location).to.equal('https://hapijs.com');
+});
+
+it('returns an error on non-object credentials error', async () => {
+
+    const server = Hapi.server({ debug: false });
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('invalid1', '123:45') } };
+
+    const res = await server.inject(request);
+
+    expect(res.result).to.exist();
+    expect(res.statusCode).to.equal(500);
+});
+
+it('returns an error on missing credentials error', async () => {
+
+    const server = Hapi.server({ debug: false });
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('invalid2', '123:45') } };
+
+    const res = await server.inject(request);
+
+    expect(res.result).to.exist();
+    expect(res.statusCode).to.equal(500);
+});
+
+it('returns an error on insufficient scope', async () => {
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: {
+                strategy: 'default',
+                scope: 'x'
+            }
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+
+    const res = await server.inject(request);
+
+    expect(res.result).to.exist();
+    expect(res.statusCode).to.equal(403);
+});
+
+it('returns an error on insufficient scope specified as an array', async () => {
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: {
+                strategy: 'default',
+                scope: ['x', 'y']
+            }
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+
+    const res = await server.inject(request);
+
+    expect(res.result).to.exist();
+    expect(res.statusCode).to.equal(403);
+});
+
+it('authenticates scope specified as an array', async () => {
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
+
+            return 'ok';
+        },
+        options: {
+            auth: {
+                strategy: 'default',
+                scope: ['x', 'y', 'a']
+            }
+        }
+    });
+
+    const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+
+    const res = await server.inject(request);
+
+    expect(res.result).to.exist();
+    expect(res.statusCode).to.equal(200);
+});
+
+it('should ask for credentials if server has one default strategy', async () => {
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.route({
+        path: '/',
+        method: 'GET',
+        options: {
+            auth: 'default',
+            handler: function (request, h) {
+
+                return 'ok';
+            }
+        }
+    });
+
+    const validOptions = { method: 'GET', url: '/', headers: { authorization: internals.header('john', '123:45') } };
+    const res1 = await server.inject(validOptions);
+
+    expect(res1.result).to.exist();
+    expect(res1.statusCode).to.equal(200);
+
+    const res2 = await server.inject('/');
+
+    expect(res2.result).to.exist();
+    expect(res2.statusCode).to.equal(401);
+});
+
+
+it('cannot add a route that has payload validation required', async () => {
+
+    const server = Hapi.server();
+    await server.register(require('../'));
+
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+
+    const fn = function () {
+
+        server.route({
+            method: 'POST',
+            path: '/',
+            handler: function (request, h) {
+
+                return 'ok';
+            },
+            options: {
+                auth: {
+                    strategy: 'default',
+                    mode: 'required',
+                    payload: 'required'
+                }
+            }
         });
     };
 
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({ method: 'POST', path: '/', handler: handler });
-        server.route({
-            method: 'POST',
-            path: '/inner',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.equal('ok');
-            done();
-        });
-    });
+    expect(fn).to.throw('Payload validation can only be required when all strategies support it in /');
 });
 
-it('returns a reply on failed optional auth', (done) => {
+it('cannot add a route that has payload validation as optional', async () => {
 
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
+    const server = Hapi.server();
+    await server.register(require('../'));
 
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+
+    const fn = function () {
+
         server.route({
             method: 'POST',
             path: '/',
-            handler: function (request, reply) {
+            handler: function (request, h) {
 
-                return reply('ok');
+                return 'ok';
             },
-            config: {
+            options: {
                 auth: {
-                    mode: 'optional'
+                    strategy: 'default',
+                    mode: 'required',
+                    payload: 'optional'
                 }
             }
         });
+    };
 
-        const request = { method: 'POST', url: '/' };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.equal('ok');
-            done();
-        });
-    });
+    expect(fn).to.throw('Payload authentication requires at least one strategy with payload support in /');
 });
 
-it('returns an error on bad password', (done) => {
+it('can add a route that has payload validation as none', async () => {
 
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
+    const server = Hapi.server();
+    await server.register(require('../'));
 
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
+    server.auth.strategy('default', 'basic', { validate: internals.user });
+
+    const fn = function () {
+
         server.route({
             method: 'POST',
             path: '/',
-            handler: function (request, reply) {
+            handler: function (request, h) {
 
-                return reply('ok');
+                return 'ok';
             },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', 'abcd') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.statusCode).to.equal(401);
-            done();
-        });
-    });
-});
-
-it('returns an error on bad header format', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: 'basic' } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(400);
-            expect(res.result.isMissing).to.equal(undefined);
-            done();
-        });
-    });
-});
-
-it('returns an error on bad header internal syntax', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: 'basic 123' } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(400);
-            expect(res.result.isMissing).to.equal(undefined);
-            done();
-        });
-    });
-});
-
-it('returns an error on missing username', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('', '') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(401);
-            done();
-        });
-    });
-});
-
-it('allow missing username', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-
-        server.auth.strategy('default', 'basic', {
-            validateFunc: function (request, username, password, callback) {
-
-                callback(null, true, {});
-            },
-            allowEmptyUsername: true
-        });
-
-        server.route({
-            method: 'GET',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        server.inject({ method: 'GET', url: '/', headers: { authorization: internals.header('', 'abcd') } }, (res) => {
-
-            expect(res.statusCode).to.equal(200);
-            done();
-        });
-    });
-});
-
-it('returns an error on unknown user', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('doe', '123:45') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(401);
-            done();
-        });
-    });
-});
-
-it('returns an error on internal user lookup error', (done) => {
-
-    const server = new Hapi.Server({ debug: false });
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('jane', '123:45') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(500);
-            done();
-        });
-    });
-});
-
-it('returns an error on non-object credentials error', (done) => {
-
-    const server = new Hapi.Server({ debug: false });
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('invalid1', '123:45') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(500);
-            done();
-        });
-    });
-});
-
-it('returns an error on missing credentials error', (done) => {
-
-    const server = new Hapi.Server({ debug: false });
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('invalid2', '123:45') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(500);
-            done();
-        });
-    });
-});
-
-it('returns an error on insufficient scope', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
+            options: {
                 auth: {
-                    scope: 'x'
+                    strategy: 'default',
+                    mode: 'required',
+                    payload: false
                 }
             }
         });
+    };
 
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(403);
-            done();
-        });
-    });
+    expect(fn).to.not.throw();
 });
 
-it('returns an error on insufficient scope specified as an array', (done) => {
+it('includes additional attributes in WWW-Authenticate header', async () => {
 
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
+    const server = Hapi.server();
+    await server.register(require('../'));
 
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: {
-                    scope: ['x', 'y']
-                }
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(403);
-            done();
-        });
+    server.auth.strategy('default', 'basic', {
+        validate: internals.user,
+        unauthorizedAttributes: { realm: 'hapi' }
     });
-});
 
-it('authenticates scope specified as an array', (done) => {
+    server.route({
+        method: 'POST',
+        path: '/',
+        handler: function (request, h) {
 
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: {
-                    scope: ['x', 'y', 'a']
-                }
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result).to.exist();
-            expect(res.statusCode).to.equal(200);
-            done();
-        });
+            return 'ok';
+        },
+        options: {
+            auth: 'default'
+        }
     });
-});
 
-it('should ask for credentials if server has one default strategy', (done) => {
+    const request = { method: 'POST', url: '/' };
 
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
+    const res = await server.inject(request);
 
-        expect(err).to.not.exist();
-
-        server.auth.strategy('default', 'basic', { validateFunc: internals.user });
-        server.route({
-            path: '/',
-            method: 'GET',
-            config: {
-                auth: 'default',
-                handler: function (request, reply) {
-
-                    return reply('ok');
-                }
-            }
-        });
-
-        const validOptions = { method: 'GET', url: '/', headers: { authorization: internals.header('john', '123:45') } };
-        server.inject(validOptions, (res1) => {
-
-            expect(res1.result).to.exist();
-            expect(res1.statusCode).to.equal(200);
-
-            server.inject('/', (res2) => {
-
-                expect(res2.result).to.exist();
-                expect(res2.statusCode).to.equal(401);
-                done();
-            });
-        });
-    });
-});
-
-
-it('cannot add a route that has payload validation required', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-
-        const fn = function () {
-
-            server.route({
-                method: 'POST',
-                path: '/',
-                handler: function (request, reply) {
-
-                    return reply('ok');
-                },
-                config: {
-                    auth: {
-                        mode: 'required',
-                        payload: 'required'
-                    }
-                }
-            });
-        };
-
-        expect(fn).to.throw('Payload validation can only be required when all strategies support it in /');
-        done();
-    });
-});
-
-it('cannot add a route that has payload validation as optional', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-
-        const fn = function () {
-
-            server.route({
-                method: 'POST',
-                path: '/',
-                handler: function (request, reply) {
-
-                    return reply('ok');
-                },
-                config: {
-                    auth: {
-                        mode: 'required',
-                        payload: 'optional'
-                    }
-                }
-            });
-        };
-
-        expect(fn).to.throw('Payload authentication requires at least one strategy with payload support in /');
-        done();
-    });
-});
-
-it('can add a route that has payload validation as none', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', { validateFunc: internals.user });
-
-        const fn = function () {
-
-            server.route({
-                method: 'POST',
-                path: '/',
-                handler: function (request, reply) {
-
-                    return reply('ok');
-                },
-                config: {
-                    auth: {
-                        mode: 'required',
-                        payload: false
-                    }
-                }
-            });
-        };
-
-        expect(fn).to.not.throw();
-        done();
-    });
-});
-
-it('passes non-error err in response', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-
-        server.auth.strategy('basic', 'basic', true, {
-            validateFunc: function (request, username, password, callback) {
-
-                return callback({ some: 'value' }, false, null);
-            }
-        });
-
-        server.route({
-            method: 'GET',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            }
-        });
-
-        const request = { method: 'GET', url: '/', headers: { authorization: internals.header('john', 'password') } };
-
-        server.inject(request, (res) => {
-
-            expect(res.result.some).to.equal('value');
-            expect(res.statusCode).to.equal(200);
-            done();
-        });
-    });
-});
-
-it('accepts request object in validateFunc', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', {
-
-            validateFunc: function (request, username, password, callback) {
-
-                expect(request).to.be.object();
-                done();
-                return;
-            }
-        });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/', headers: { authorization: internals.header('john', '123:45') } };
-
-        server.inject(request, (res) => {
-
-            //done();
-        });
-    });
-});
-
-it('includes additional attributes in WWW-Authenticate header', (done) => {
-
-    const server = new Hapi.Server();
-    server.connection();
-    server.register(require('../'), (err) => {
-
-        expect(err).to.not.exist();
-        server.auth.strategy('default', 'basic', 'required', {
-            validateFunc: internals.user,
-            unauthorizedAttributes: { realm: 'hapi' }
-        });
-        server.route({
-            method: 'POST',
-            path: '/',
-            handler: function (request, reply) {
-
-                return reply('ok');
-            },
-            config: {
-                auth: 'default'
-            }
-        });
-
-        const request = { method: 'POST', url: '/' };
-
-        server.inject(request, (res) => {
-
-            const wwwAuth = 'www-authenticate';
-            expect(res.headers).to.include(wwwAuth);
-            expect(res.headers[wwwAuth]).to.equal('Basic realm=\"hapi\"');
-            done();
-        });
-    });
+    const wwwAuth = 'www-authenticate';
+    expect(res.headers).to.include(wwwAuth);
+    expect(res.headers[wwwAuth]).to.equal('Basic realm=\"hapi\"');
 });
 
 
@@ -783,27 +637,40 @@ internals.header = function (username, password) {
 };
 
 
-internals.user = function (request, username, password, callback) {
+internals.user = async function (request, username, password, h) {
 
     if (username === 'john') {
-        return callback(null, password === '123:45', {
-            user: 'john',
-            scope: ['a'],
-            tos: '1.0.0'
+        return await Promise.resolve({
+            isValid: password === '123:45',
+            credentials: {
+                user: 'john',
+                scope: ['a'],
+                tos: '1.0.0'
+            }
         });
     }
 
     if (username === 'jane') {
-        return callback(Hapi.error.internal('boom'));
+        throw Boom.badRequest('Some other problem');
+    }
+
+    if (username === 'bob') {
+        return await Promise.resolve({ response: h.redirect('https://hapijs.com') });
     }
 
     if (username === 'invalid1') {
-        return callback(null, true, 'bad');
+        return await Promise.resolve({
+            isValid: true,
+            credentials: 'bad'
+        });
     }
 
     if (username === 'invalid2') {
-        return callback(null, true, null);
+        return await Promise.resolve({
+            isValid: true,
+            credentials: null
+        });
     }
 
-    return callback(null, false);
+    return { isValid: false };
 };
