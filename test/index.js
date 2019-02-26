@@ -72,7 +72,13 @@ it('returns a reply on successful double auth', async () => {
 
     const handler = async function (request, h) {
 
-        const options = { method: 'POST', url: '/inner', headers: { authorization: internals.header('john', '123:45') }, credentials: request.auth.credentials };
+        const options = {
+            method: 'POST',
+            url: '/inner',
+            headers: { authorization: internals.header('john', '123:45') },
+            auth: { credentials: request.auth.credentials, strategy: 'default' }
+        };
+
         const res = await server.inject(options);
 
         return res.result;
@@ -82,6 +88,7 @@ it('returns a reply on successful double auth', async () => {
     await server.register(require('../'));
 
     server.auth.strategy('default', 'basic', { validate: internals.user });
+    server.auth.default('default');
 
     server.route({ method: 'POST', path: '/', handler });
     server.route({
@@ -633,7 +640,7 @@ it('includes additional attributes in WWW-Authenticate header', async () => {
 
 internals.header = function (username, password) {
 
-    return 'Basic ' + (new Buffer(username + ':' + password, 'utf8')).toString('base64');
+    return 'Basic ' + (Buffer.from(`${username}:${password}`, 'utf8')).toString('base64');
 };
 
 
