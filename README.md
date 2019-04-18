@@ -1,8 +1,6 @@
-### hapi-auth-basic
+# basic
 
-[![Build Status](https://secure.travis-ci.org/hapijs/hapi-auth-basic.svg)](http://travis-ci.org/hapijs/hapi-auth-basic)
-
-Lead Maintainer: [Matt Harrison](https://github.com/mtharrison)
+[![Build Status](https://secure.travis-ci.org/hapijs/basic.svg?branch=master)](http://travis-ci.org/hapijs/basic)
 
 Basic authentication requires validating a username and password combination. The `'basic'` scheme takes the following options:
 
@@ -22,7 +20,7 @@ Basic authentication requires validating a username and password combination. Th
 
 ```javascript
 const Bcrypt = require('bcrypt');
-const Hapi = require('hapi');
+const Hapi = require('@hapi/hapi');
 
 const users = {
     john: {
@@ -54,7 +52,7 @@ const main = async () => {
 
     const server = Hapi.server({ port: 4000 });
 
-    await server.register(require('hapi-auth-basic'));
+    await server.register(require('@hapi/basic'));
 
     server.auth.strategy('simple', 'basic', { validate });
     server.auth.default('simple');
