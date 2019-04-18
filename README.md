@@ -1,3 +1,5 @@
+<a href="http://hapijs.com"><img src="https://github.com/hapijs/assets/blob/master/images/family.svg" width="180px" align="right" /></a>
+
 # basic
 
 [![Build Status](https://secure.travis-ci.org/hapijs/basic.svg?branch=master)](http://travis-ci.org/hapijs/basic)
