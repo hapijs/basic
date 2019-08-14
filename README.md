@@ -2,7 +2,7 @@
 
 # basic
 
-[![Build Status](https://secure.travis-ci.org/hapijs/basic.svg?branch=master)](http://travis-ci.org/hapijs/basic) [![Greenkeeper badge](https://badges.greenkeeper.io/hapijs/basic.svg)](https://greenkeeper.io/)
+[![Build Status](https://secure.travis-ci.org/hapijs/basic.svg?branch=master)](http://travis-ci.org/hapijs/basic)
 
 Basic authentication requires validating a username and password combination. The `'basic'` scheme takes the following options:
 
