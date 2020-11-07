@@ -12,7 +12,7 @@ jobs:
         hapi: ['20', '19']
 
     runs-on: ${{ matrix.os }}
-    name: using node@${{ matrix.node }}
+    name: ${{ matrix.os }}/node@${{ matrix.node }}/${{ matrix.hapi }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
