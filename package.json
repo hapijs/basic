@@ -1,7 +1,7 @@
 {
   "name": "@hapi/basic",
   "description": "Basic authentication plugin",
-  "version": "6.0.0",
+  "version": "7.0.0",
   "repository": "git://github.com/hapijs/basic",
   "main": "lib/index.js",
   "files": [
