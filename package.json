@@ -19,14 +19,14 @@
     ]
   },
   "dependencies": {
-    "@hapi/boom": "^10.0.0",
-    "@hapi/hoek": "^10.0.0"
+    "@hapi/boom": "^10.0.1",
+    "@hapi/hoek": "^11.0.2"
   },
   "devDependencies": {
-    "@hapi/code": "^9.0.1",
+    "@hapi/code": "^9.0.3",
     "@hapi/eslint-plugin": "*",
-    "@hapi/hapi": "^21.0.0-beta.1",
-    "@hapi/lab": "^25.0.1"
+    "@hapi/hapi": "^21.2.1",
+    "@hapi/lab": "^25.1.2"
   },
   "scripts": {
     "test": "lab -a @hapi/code -t 100 -L",
