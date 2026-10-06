@@ -1,27 +1,22 @@
-'use strict';
+import { readFileSync } from 'node:fs';
 
-const Boom = require('@hapi/boom');
-const Hoek = require('@hapi/hoek');
+import * as Boom from '@hapi/boom';
+import * as Hoek from '@hapi/hoek';
 
+const Package = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
-const internals = {};
-
-
-exports.plugin = {
-    pkg: require('../package.json'),
+export const plugin = {
+    pkg: Package,
     requirements: {
-        hapi: '>=20.0.0'
+        hapi: '>=20.0.0',
     },
 
     register(server, options) {
-
-        server.auth.scheme('basic', internals.implementation);
-    }
+        server.auth.scheme('basic', implementation);
+    },
 };
 
-
-internals.implementation = function (server, options) {
-
+function implementation(server, options) {
     Hoek.assert(options, 'Missing basic auth strategy options');
     Hoek.assert(typeof options.validate === 'function', 'options.validate must be a valid function in basic scheme');
 
@@ -29,7 +24,6 @@ internals.implementation = function (server, options) {
 
     const scheme = {
         authenticate: async function (request, h) {
-
             const authorization = request.headers.authorization;
 
             if (!authorization) {
@@ -55,10 +49,12 @@ internals.implementation = function (server, options) {
             const username = credentialsPart.slice(0, sep);
             const password = credentialsPart.slice(sep + 1);
 
-            if (!username &&
-                !settings.allowEmptyUsername) {
-
-                throw Boom.unauthorized('HTTP authentication header missing username', 'Basic', settings.unauthorizedAttributes);
+            if (!username && !settings.allowEmptyUsername) {
+                throw Boom.unauthorized(
+                    'HTTP authentication header missing username',
+                    'Basic',
+                    settings.unauthorizedAttributes,
+                );
             }
 
             const { isValid, credentials, response } = await settings.validate(request, username, password, h);
@@ -68,18 +64,19 @@ internals.implementation = function (server, options) {
             }
 
             if (!isValid) {
-                return h.unauthenticated(Boom.unauthorized('Bad username or password', 'Basic', settings.unauthorizedAttributes), credentials ? { credentials } : null);
+                return h.unauthenticated(
+                    Boom.unauthorized('Bad username or password', 'Basic', settings.unauthorizedAttributes),
+                    credentials ? { credentials } : null,
+                );
             }
 
-            if (!credentials ||
-                typeof credentials !== 'object') {
-
+            if (!credentials || typeof credentials !== 'object') {
                 throw Boom.badImplementation('Bad credentials object received for Basic auth validation');
             }
 
             return h.authenticated({ credentials });
-        }
+        },
     };
 
     return scheme;
-};
+}

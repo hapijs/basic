@@ -1,52 +1,57 @@
-// from https://github.com/hapijs/hapi-auth-basic#hapi-auth-basic
-
-import * as Basic from '..';
 import { Server } from '@hapi/hapi';
-import { types } from '@hapi/lab';
+import { describe, expectTypeOf, it } from 'vitest';
 
-import type { Plugin } from '@hapi/hapi';
+import * as Basic from '../src/index.js';
 
-const server = new Server();
-
-types.expect.type<Plugin<any>>(Basic);
+import type { Plugin, Request, ResponseToolkit, ServerRegisterPluginObject } from '@hapi/hapi';
 
 interface User {
-  username: string;
-  password: string;
-  name: string;
-  id: string;
+    username: string;
+    password: string;
+    name: string;
+    id: string;
 }
 
-const users: {[index: string]: User} = {
-  john: {
-    username: 'john',
-    password: '$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm',  // 'secret'
-    name: 'John Doe',
-    id: '2133d32a'
-  }
+const users: Record<string, User> = {
+    john: {
+        username: 'john',
+        password: '$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm',
+        name: 'John Doe',
+        id: '2133d32a',
+    },
 };
 
-const validate: Basic.Validate = async (request, username, password, h) => {
+describe('typings', () => {
+    it('exports a hapi plugin', () => {
+        expectTypeOf(Basic.plugin).toEqualTypeOf<Plugin<{}>>();
+        expectTypeOf(Basic).toExtend<ServerRegisterPluginObject<{}>>();
+    });
 
-  const user = users[username];
-  if (!user) {
-    return { isValid: false, credentials: null };
-  }
+    it('accepts a validate function as strategy options', async () => {
+        const validate: Basic.Validate = (request, username, password, h) => {
+            expectTypeOf(request).toEqualTypeOf<Request>();
+            expectTypeOf(password).toEqualTypeOf<string>();
+            expectTypeOf(h).toEqualTypeOf<ResponseToolkit>();
 
-  const isValid = true; // No need to check for type tests
+            const user = users[username];
+            if (!user) {
+                return Promise.resolve({ isValid: false, credentials: null });
+            }
 
-  return { isValid, credentials: { id: user.id, name: user.name } };
-};
+            return Promise.resolve({ isValid: true, credentials: { id: user.id, name: user.name } });
+        };
 
-server.register(Basic).then(() => {
+        const server = new Server();
+        await server.register(Basic);
 
-  server.auth.strategy('simple', 'basic', { validate });
-  server.auth.default('simple');
+        server.auth.strategy('simple', 'basic', { validate });
+        server.auth.default('simple');
 
-  server.route({
-    method: 'GET',
-    path: '/',
-    handler: () => null,
-    options: { auth: 'simple' }
-  });
+        server.route({
+            method: 'GET',
+            path: '/',
+            handler: () => null,
+            options: { auth: 'simple' },
+        });
+    });
 });

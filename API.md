@@ -1,4 +1,3 @@
-
 ## Usage
 
 Basic authentication requires validating a username and password combination. The `'basic'` scheme takes the following options:
@@ -24,16 +23,15 @@ const Hapi = require('@hapi/hapi');
 const users = {
     john: {
         username: 'john',
-        password: '$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm',   // 'secret'
+        password: '$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm', // 'secret'
         name: 'John Doe',
-        id: '2133d32a'
-    }
+        id: '2133d32a',
+    },
 };
 
 const validate = async (request, username, password, h) => {
-
     if (username === 'help') {
-        return { response: h.redirect('https://hapijs.com/help') };     // custom response
+        return { response: h.redirect('https://hapijs.com/help') }; // custom response
     }
 
     const user = users[username];
@@ -48,7 +46,6 @@ const validate = async (request, username, password, h) => {
 };
 
 const main = async () => {
-
     const server = Hapi.server({ port: 4000 });
 
     await server.register(require('@hapi/basic'));
@@ -60,9 +57,8 @@ const main = async () => {
         method: 'GET',
         path: '/',
         handler: function (request, h) {
-
             return 'welcome';
-        }
+        },
     });
 
     await server.start();
@@ -71,10 +67,9 @@ const main = async () => {
 };
 
 main()
-.then((server) => console.log(`Server listening on ${server.info.uri}`))
-.catch((err) => {
-
-    console.error(err);
-    process.exit(1);
-});
+    .then((server) => console.log(`Server listening on ${server.info.uri}`))
+    .catch((err) => {
+        console.error(err);
+        process.exit(1);
+    });
 ```

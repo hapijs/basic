@@ -1,27 +1,9 @@
-'use strict';
-
-const Code = require('@hapi/code');
-const Lab = require('@hapi/lab');
-
-
-const { before, describe, it } = exports.lab = Lab.script();
-const expect = Code.expect;
-
+import { describe, expect, it } from 'vitest';
 
 describe('import()', () => {
+    it('exposes all methods and classes as named imports', async () => {
+        const Basic = await import('../src/index.js');
 
-    let Basic;
-
-    before(async () => {
-
-        Basic = await import('../lib/index.js');
-    });
-
-    it('exposes all methods and classes as named imports', () => {
-
-        expect(Object.keys(Basic)).to.equal([
-            'default',
-            'plugin'
-        ]);
+        expect(Object.keys(Basic)).toStrictEqual(['plugin']);
     });
 });
